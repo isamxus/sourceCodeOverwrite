@@ -31,7 +31,7 @@ function *generator():Generator{
 const promise = new CustomAsync(generator).async();
 
 promise.then(res => {
-    console.log(res, 'fwefwe');
+    console.log(res, '结果');
 })
 
 

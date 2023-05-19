@@ -43,6 +43,6 @@
 >>> * 此时async方法返回的Promise实例状态改变，可以通过then方法获取到resolve的值。  
 ```typescript
             promise.then(res => {
-                console.log(res, 'fwefwe');
+                console.log(res, '结果');
             })
 ```
