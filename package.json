@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "tsc -w",
     "build": "tsc",
-    "test": "npm run build && node dist/index.js"
+    "test": "npm run build && node dist/CustomPromise/index.js"
   },
   "author": "",
   "license": "ISC",
