@@ -55,7 +55,7 @@ export class CustomPromise extends AbstractPromise<CustomPromise> {
 }
 
 const promise = new CustomPromise((resolve, reject) => {
-    resolve(1);
+    reject(1);
 }).then(res => {
     console.log(res, 'success');
 }, err => {

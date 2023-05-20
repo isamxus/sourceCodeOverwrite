@@ -74,7 +74,7 @@
                 }
                 protected rejectFn = (reason:any) => {
                     setTimeout(() => { 
-                        if(this.status !== PromiseStatus.REJECTED) return;
+                        if(this.status !== PromiseStatus.PENDING) return;
                         this.status = PromiseStatus.REJECTED;
                         this.value = reason;
                         this.handleCallback(this.failCallbacks);
