@@ -63,7 +63,7 @@
                 public value:any;
                 protected status:PromiseStatus = PromiseStatus.PENDING;
                 protected successCallbacks:Array<any> = []; // then方法中的第一个回调集合(成功)
-                protected failCallback:Array<any> = []; // then方法中的第二个回调集合(失败)
+                protected failCallbacks:Array<any> = []; // then方法中的第二个回调集合(失败)
                 protected resolveFn = (result:any) => { 
                     setTimeout(() => { //确保构造函数executor异步改变状态，如果不用setTimeout，executor中同步改变状态会导致回调数组一直为空
                         if(this.status !== PromiseStatus.PENDING) return;
@@ -77,7 +77,7 @@
                         if(this.status !== PromiseStatus.REJECTED) return;
                         this.status = PromiseStatus.REJECTED;
                         this.value = reason;
-                        this.handleCallback(this.failCallback);
+                        this.handleCallback(this.failCallbacks);
                     })
                 }
                 constructor(executor:TExecutor){
@@ -95,7 +95,7 @@
                 }
                 abstract then(resolve:TResolveAndReject,reject:TResolveAndReject):T;
                 abstract catch(reject:TResolveAndReject):T;
-                abstract done(resolve:TResolveAndReject, reject:TResolveAndReject):void;
+                abstract done():void;
                 abstract finally(callback:TCommonFn):T;
                 abstract resolve(target:any):T;
                 abstract reject(target:any):T;
@@ -114,7 +114,7 @@
 ```typescript
             then(resolveFn: TResolveAndReject, rejectFn: TResolveAndReject): CustomPromise {
                 resolveFn = typeof resolveFn !== 'function' ? result => result : resolveFn;
-                rejectFn = typeof rejectFn !== 'function' ? reason => this.reject(reason) : rejectFn;
+                rejectFn = typeof rejectFn !== 'function' ? reason => this.rejectFn(reason) : rejectFn;
                 return new CustomPromise((resolve, reject) => {
                     this.successCallbacks.push((result:any) => {
                         try{
@@ -125,7 +125,7 @@
                             reject(err);
                         }
                     });
-                    this.failCallback.push((reason:any) => {
+                    this.failCallbacks.push((reason:any) => {
                         try {
                             const res = rejectFn(reason);
                             if(res instanceof CustomPromise) return res.then(resolve, reject);
@@ -137,4 +137,19 @@
                 })
             }
 ```
+>>> * catch方法的实现非常简单，是为了捕获Promise实例失败态抛出的异常，参数是一个回调函数，相当于then方法的第二个参数，当Promise实例失败时会触发：
+```typescript
+            catch(reject: TResolveAndReject): CustomPromise {
+                return this.then(result => result, reject);
+            }
+```
+>>> * Promise链式调用无论以then还是catch结尾，它抛出的错误都有可能无法被捕捉，所以done方法处于链式调用的尾端来保证捕获最终的错误
+```typescript
+            done(): void {
+                this.catch(err => {
+                    throw err;
+                });
+            }
+```
+
 

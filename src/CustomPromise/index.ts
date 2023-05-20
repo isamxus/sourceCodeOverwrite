@@ -4,7 +4,7 @@ import { TResolveAndReject, TCommonFn } from "./CustomPromise";
 export class CustomPromise extends AbstractPromise<CustomPromise> {
     then(resolveFn: TResolveAndReject, rejectFn: TResolveAndReject): CustomPromise {
         resolveFn = typeof resolveFn !== 'function' ? result => result : resolveFn;
-        rejectFn = typeof rejectFn !== 'function' ? reason => this.reject(reason) : rejectFn;
+        rejectFn = typeof rejectFn !== 'function' ? reason => this.rejectFn(reason) : rejectFn;
         return new CustomPromise((resolve, reject) => {
             this.successCallbacks.push((result:any) => {
                 try{
@@ -15,7 +15,7 @@ export class CustomPromise extends AbstractPromise<CustomPromise> {
                     reject(err);
                 }
             });
-            this.failCallback.push((reason:any) => {
+            this.failCallbacks.push((reason:any) => {
                 try {
                     const res = rejectFn(reason);
                     if(res instanceof CustomPromise) return res.then(resolve, reject);
@@ -27,10 +27,12 @@ export class CustomPromise extends AbstractPromise<CustomPromise> {
         })
     }
     catch(reject: TResolveAndReject): CustomPromise {
-        throw new Error("Method not implemented.");
+        return this.then(result => result, reject);
     }
-    done(resolve: TResolveAndReject, reject: TResolveAndReject): void {
-        throw new Error("Method not implemented.");
+    done(): void {
+        this.catch(err => {
+            throw err;
+        });
     }
     finally(callback: TCommonFn): CustomPromise {
         throw new Error("Method not implemented.");

@@ -10,7 +10,7 @@ export abstract class AbstractPromise<T> {
     public value:any;
     protected status:PromiseStatus = PromiseStatus.PENDING;
     protected successCallbacks:Array<any> = []; // then方法中的第一个回调集合(成功)
-    protected failCallback:Array<any> = []; // then方法中的第二个回调集合(失败)
+    protected failCallbacks:Array<any> = []; // then方法中的第二个回调集合(失败)
     protected resolveFn = (result:any) => { 
         setTimeout(() => { //确保构造函数executor异步改变状态，如果不用setTimeout，executor中同步改变状态会导致回调数组一直为空
             if(this.status !== PromiseStatus.PENDING) return;
@@ -24,7 +24,7 @@ export abstract class AbstractPromise<T> {
             if(this.status !== PromiseStatus.REJECTED) return;
             this.status = PromiseStatus.REJECTED;
             this.value = reason;
-            this.handleCallback(this.failCallback);
+            this.handleCallback(this.failCallbacks);
         })
     }
     constructor(executor:TExecutor){
@@ -42,7 +42,7 @@ export abstract class AbstractPromise<T> {
     }
     abstract then(resolve:TResolveAndReject,reject:TResolveAndReject):T;
     abstract catch(reject:TResolveAndReject):T;
-    abstract done(resolve:TResolveAndReject, reject:TResolveAndReject):void;
+    abstract done():void;
     abstract finally(callback:TCommonFn):T;
     abstract resolve(target:any):T;
     abstract reject(target:any):T;
